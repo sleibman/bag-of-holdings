@@ -1,0 +1,39 @@
+# serverless.yml
+service: fund-holdings-api
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    DB_HOST: ${env:DB_HOST}
+    DB_NAME: ${env:DB_NAME}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+  vpc:
+    securityGroupIds:
+      - ${env:VPC_SECURITY_GROUP_ID_1}
+      - ${env:VPC_SECURITY_GROUP_ID_2}
+    subnetIds:
+      - ${env:VPC_SUBNET_ID_1}
+      - ${env:VPC_SUBNET_ID_2}
+
+functions:
+  api:
+    handler: mangum_handler.handler
+    events:
+      - httpApi: '*'
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerImage: lambci/lambda:build-python3.9
+    dockerizePip: true  # Changed from true to false
+    zip: true
+    slim: true
+    useDownloadCache: true
+    useStaticCache: true
+
